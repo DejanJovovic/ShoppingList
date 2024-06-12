@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shopping_list/data/categories.dart';
 import 'package:shopping_list/models/category.dart';
-import 'package:http/http.dart'
-    as http; // all the content provided from this package should be bundled in http
+import 'package:http/http.dart' as http;
+import 'package:shopping_list/models/grocery_item.dart'; // all the content provided from this package should be bundled in http
 
 class NewItem extends StatefulWidget {
   const NewItem({super.key});
@@ -22,7 +22,7 @@ class _NewItemState extends State<NewItem> {
   var _enteredQuantity = 1;
   var _selectedCategory = categories[Categories.vegetables]!;
 
-  void _saveItem() {
+  void _saveItem() async {
     if (_formKey.currentState!.validate()) {
       // validate executes to validate functions inside the form field, if at least one validator failed this will be false
       _formKey.currentState!
@@ -31,12 +31,13 @@ class _NewItemState extends State<NewItem> {
       // Firebase logic to post data
       final url = Uri.https('shoppinglist-f4bb7-default-rtdb.firebaseio.com',
           'shopping-list.json');
-      http.post(
+      final response = await http.post(
         url,
         headers: {
           'Content-Type': 'application/json',
         },
         body: json.encode(
+          // encode converts data to json
           // this data should be sent to firebase
           {
             // id doesnt need to be send because firebase generates it automatically
@@ -45,9 +46,21 @@ class _NewItemState extends State<NewItem> {
             'category': _selectedCategory.title,
           },
         ),
-      ); // encode converts data to json
+      );
 
-      //     Navigator.of(context).pop(
+      final Map<String, dynamic> responseData = json.decode(response.body);
+
+      if (!context.mounted) {
+        return;
+      }
+
+      Navigator.of(context).pop(
+        GroceryItem(
+            id: responseData['name'],
+            name: _enteredName,
+            quantity: _enteredQuantity,
+            category: _selectedCategory),
+      );
     }
   }
 
