@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:shopping_list/data/categories.dart';
 
-class NewItem extends StatefulWidget{
-
+class NewItem extends StatefulWidget {
   const NewItem({super.key});
 
   @override
   State<NewItem> createState() {
     return _NewItemState();
   }
-
 }
 
-class _NewItemState extends State<NewItem>{
-
+class _NewItemState extends State<NewItem> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,8 +19,72 @@ class _NewItemState extends State<NewItem>{
       ),
       body: Padding(
         padding: const EdgeInsets.all(12),
-        child: Text('The form'),
+        child: Form(
+          child: Column(
+            children: [
+              TextFormField(
+                // instead of TextField()
+                maxLength: 50, // no longer that 50 characters
+                decoration: const InputDecoration(
+                  label: Text('Name'),
+                ),
+                validator: (value) {
+                  return 'Validation';
+                },
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      decoration: const InputDecoration(
+                        label: Text('Quantity'),
+                      ),
+                      initialValue:
+                          '1', //allows to set an initial value that will be set inside this formField
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: DropdownButtonFormField(items: [
+                      for (final category in categories.entries)
+                        DropdownMenuItem(
+                          value: category.value,
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 16,
+                                height: 16,
+                                color: category.value.color,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(category.value.title)
+                            ],
+                          ),
+                        ),
+                    ], onChanged: (value){}
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: (){}, 
+                    child: const Text('Reset'),
+                    ),
+                  ElevatedButton(
+                    onPressed: (){}, 
+                    child: const Text('Add item'),
+                    ),
+                ],
+              ),
+            ],
+          ),
         ),
+      ),
     );
   }
 }
