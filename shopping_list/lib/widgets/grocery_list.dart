@@ -80,10 +80,30 @@ class _GroceryListState extends State<GroceryList> {
     });
   }
 
-  void _removeItem(GroceryItem item) {
+  void _removeItem(GroceryItem item) async{
+
+    final index = _groceryItems.indexOf(item);
+
     setState(() {
       _groceryItems.remove(item);
     });
+
+    // targeting a specific id when deleting
+    final url = Uri.https(
+        'shoppinglist-f4bb7-default-rtdb.firebaseio.com', 'shopping-list/${item.id}.json');
+
+    final response = await http.delete(url);
+    
+    //something went wrong when deleting the item, undo that item
+    if(response.statusCode >= 400) {
+      // Optional: Show an error message
+      setState(() {
+        // using insert to bring back the deleted item on the place where it was previously
+      _groceryItems.insert(index, item);
+    });
+    }
+
+    
   }
 
   @override
