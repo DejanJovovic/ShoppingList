@@ -16,6 +16,7 @@ class GroceryList extends StatefulWidget {
 class _GroceryListState extends State<GroceryList> {
   List<GroceryItem> _groceryItems = [];
   var _isLoading = true;
+  String? _error;
 
   @override
   void initState() {
@@ -28,6 +29,15 @@ class _GroceryListState extends State<GroceryList> {
         'shoppinglist-f4bb7-default-rtdb.firebaseio.com', 'shopping-list.json');
 
     final response = await http.get(url);
+
+
+    if(response.statusCode >= 400){
+      setState(() {
+        _error = 'Failed to fetch data. Please try again!';
+      });
+    }
+
+
     final Map<String, dynamic> groceryListData = json.decode(response.body);
     final List<GroceryItem> loadedGroceryItems = [];
 
@@ -108,6 +118,12 @@ class _GroceryListState extends State<GroceryList> {
           ),
         ),
       );
+    }
+
+  // if for some reason there is an error when getting the data from firebase, 
+  // here i check if its not null and display it on the screen
+    if(_error != null) {
+      content = Center(child: Text(_error!));
     }
 
     return Scaffold(
