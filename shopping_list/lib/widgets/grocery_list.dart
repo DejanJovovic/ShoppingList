@@ -28,15 +28,25 @@ class _GroceryListState extends State<GroceryList> {
     final url = Uri.https(
         'shoppinglist-f4bb7-default-rtdb.firebaseio.com', 'shopping-list.json');
 
-    final response = await http.get(url);
+    
+    // if the code inside try causes an error, catch that error
+    // if there is a problem with the internet connection for example
+    try { 
+      final response = await http.get(url);
 
-
-    if(response.statusCode >= 400){
+       if(response.statusCode >= 400){
       setState(() {
         _error = 'Failed to fetch data. Please try again!';
       });
     }
 
+    // ** this is only for firebase ** returns a null as a string, instead of null
+    if(response.body == 'null'){
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
 
     final Map<String, dynamic> groceryListData = json.decode(response.body);
     final List<GroceryItem> loadedGroceryItems = [];
@@ -62,6 +72,14 @@ class _GroceryListState extends State<GroceryList> {
       _groceryItems = loadedGroceryItems;
       _isLoading = false;
     });
+
+    } catch (error) {
+         setState(() {
+        _error = 'Something went wrong. Please try again!';
+      });
+    }
+
+   
   }
 
   void _addItem() async {
