@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:shopping_list/data/categories.dart';
 import 'package:shopping_list/models/category.dart';
-import 'package:shopping_list/models/grocery_item.dart';
+import 'package:http/http.dart'
+    as http; // all the content provided from this package should be bundled in http
 
 class NewItem extends StatefulWidget {
   const NewItem({super.key});
@@ -24,14 +27,27 @@ class _NewItemState extends State<NewItem> {
       // validate executes to validate functions inside the form field, if at least one validator failed this will be false
       _formKey.currentState!
           .save(); // this will be triggered if validate returns true(if validation successeds)
-      Navigator.of(context).pop( // this will pass the new GroceryItem to the grocery_list screen when its called
-        GroceryItem(
-          id: DateTime.now().toString(),
-          name: _enteredName,
-          quantity: _enteredQuantity,
-          category: _selectedCategory,
+
+      // Firebase logic to post data
+      final url = Uri.https('shoppinglist-f4bb7-default-rtdb.firebaseio.com',
+          'shopping-list.json');
+      http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode(
+          // this data should be sent to firebase
+          {
+            // id doesnt need to be send because firebase generates it automatically
+            'name': _enteredName,
+            'quantity': _enteredQuantity,
+            'category': _selectedCategory.title,
+          },
         ),
-      ); 
+      ); // encode converts data to json
+
+      //     Navigator.of(context).pop(
     }
   }
 
