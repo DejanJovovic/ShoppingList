@@ -22,11 +22,18 @@ class _NewItemState extends State<NewItem> {
   var _enteredQuantity = 1;
   var _selectedCategory = categories[Categories.vegetables]!;
 
+  var _isSending = false;
+
   void _saveItem() async {
     if (_formKey.currentState!.validate()) {
       // validate executes to validate functions inside the form field, if at least one validator failed this will be false
       _formKey.currentState!
           .save(); // this will be triggered if validate returns true(if validation successeds)
+
+      // update the UI when the add item button is pressed
+      setState(() {
+        _isSending = true;
+      });
 
       // Firebase logic to post data
       final url = Uri.https('shoppinglist-f4bb7-default-rtdb.firebaseio.com',
@@ -157,15 +164,26 @@ class _NewItemState extends State<NewItem> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: () {
-                      _formKey.currentState!
-                          .reset(); // this will reset all the values on the input fields
-                    },
+                    // if _isSending is false return null in the onPressed(disable that button) else reset the state
+                    onPressed: _isSending
+                        ? null
+                        : () {
+                            _formKey.currentState!
+                                .reset(); // this will reset all the values on the input fields
+                          },
                     child: const Text('Reset'),
                   ),
                   ElevatedButton(
-                    onPressed: _saveItem,
-                    child: const Text('Add item'),
+                    // same as in the button above, if the _isSending is false disable this button else call _saveItem function
+                    onPressed: _isSending ? null : _saveItem,
+                    // if _isSending is false add a cicular progress indicator to let the user know its adding the item, else just show the Text widget
+                    child: _isSending
+                        ? const SizedBox(
+                            height: 16,
+                            width: 16,
+                            child: CircularProgressIndicator(),
+                          )
+                        : const Text('Add item'),
                   ),
                 ],
               ),
